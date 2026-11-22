@@ -1,0 +1,2842 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Berkas Investigasi — Cheatsheet CTF Digital Forensics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: dark;
+  --bg: #0a0d12;
+  --bg-raised: #10141b;
+  --bg-panel: #131821;
+  --bg-card: #141a24;
+  --bg-code: #0c1016;
+  --line: #222b38;
+  --line-soft: #1a212c;
+  --ink: #e9edf4;
+  --ink-dim: #96a3b8;
+  --ink-faint: #5d6b80;
+  --amber: #e2a73e;
+  --amber-ink: #0a0d12;
+  --teal: #37c2ad;
+  --blue: #5b9dd9;
+  --rose: #e2694f;
+  --shadow: 0 18px 40px -16px rgba(0,0,0,0.55);
+  --radius: 14px;
+  --font-sans: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  --maxw: 1320px;
+}
+:root:not([data-theme="light"]){ }
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme: light;
+    --bg: #f5f3ee;
+    --bg-raised: #ffffff;
+    --bg-panel: #ffffff;
+    --bg-card: #ffffff;
+    --bg-code: #15191f;
+    --line: #e1ddd2;
+    --line-soft: #ebe7dc;
+    --ink: #1c2230;
+    --ink-dim: #596274;
+    --ink-faint: #8a93a3;
+    --amber: #b9791c;
+    --amber-ink: #fffaf0;
+    --teal: #0d8c78;
+    --blue: #2563a8;
+    --rose: #c2492f;
+    --shadow: 0 14px 32px -16px rgba(30,25,10,0.18);
+  }
+}
+:root[data-theme="light"]{
+  color-scheme: light;
+  --bg: #f5f3ee;
+  --bg-raised: #ffffff;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+  --bg-code: #15191f;
+  --line: #e1ddd2;
+  --line-soft: #ebe7dc;
+  --ink: #1c2230;
+  --ink-dim: #596274;
+  --ink-faint: #8a93a3;
+  --amber: #b9791c;
+  --amber-ink: #fffaf0;
+  --teal: #0d8c78;
+  --blue: #2563a8;
+  --rose: #c2492f;
+  --shadow: 0 14px 32px -16px rgba(30,25,10,0.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--font-sans);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top: calc(74px + env(safe-area-inset-top,0px));}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--bg-raised);}
+a{color:inherit;}
+code{font-family:var(--font-mono);}
+::selection{background:var(--amber); color:var(--amber-ink);}
+
+/* ============ Top bar ============ */
+.topbar{
+  position:sticky; top:0; z-index:30;
+  background:color-mix(in srgb, var(--bg-raised) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--line);
+  padding-top:env(safe-area-inset-top,0px);
+}
+.topbar-inner{
+  max-width:var(--maxw); margin:0 auto; padding:0.85rem 1.5rem;
+  display:flex; align-items:center; gap:1.25rem;
+}
+.mark{display:flex; align-items:center; gap:0.65rem; flex-shrink:0;}
+.mark-badge{
+  width:38px; height:38px; border-radius:9px; display:block; object-fit:cover;
+  background:var(--amber);
+}
+.mark-text{display:flex; flex-direction:column; line-height:1.15;}
+.mark-text strong{font-size:0.98rem; font-weight:700; letter-spacing:-0.01em;}
+.mark-text span{font-size:0.72rem; color:var(--ink-faint); font-family:var(--font-mono);}
+.topbar-search{flex:1; max-width:460px; position:relative;}
+.topbar-search input{
+  width:100%; padding:0.6rem 0.9rem 0.6rem 2.4rem; border-radius:10px; border:1px solid var(--line);
+  background:var(--bg-panel); color:var(--ink); font-size:0.9rem; font-family:var(--font-sans); outline:none;
+}
+.topbar-search input:focus{border-color:var(--amber); box-shadow:0 0 0 3px color-mix(in srgb, var(--amber) 20%, transparent);}
+.topbar-search svg{position:absolute; left:0.8rem; top:50%; transform:translateY(-50%); color:var(--ink-faint);}
+.topbar-search .clear-btn{
+  position:absolute; right:0.5rem; top:50%; transform:translateY(-50%);
+  border:none; background:none; color:var(--ink-faint); cursor:pointer; padding:0.2rem 0.4rem; display:none; font-size:1rem;
+}
+.topbar-actions{display:flex; align-items:center; gap:0.5rem; flex-shrink:0;}
+.icon-btn{
+  width:38px; height:38px; border-radius:9px; border:1px solid var(--line); background:var(--bg-panel);
+  color:var(--ink); display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.icon-btn:hover{border-color:var(--amber);}
+.menu-btn{display:none;}
+
+/* ============ Layout ============ */
+.layout{max-width:var(--maxw); margin:0 auto; display:grid; grid-template-columns:232px 1fr; gap:2rem; padding:1.75rem 1.5rem 5rem;}
+.sidebar{position:sticky; top:calc(74px + env(safe-area-inset-top,0px)); align-self:start; max-height:calc(100vh - 100px); overflow:auto;}
+.sidebar::-webkit-scrollbar{width:0;}
+.nav-link{
+  display:flex; align-items:center; gap:0.65rem; width:100%; text-align:left; padding:0.55rem 0.7rem;
+  border-radius:9px; border:none; background:none; color:var(--ink-dim); cursor:pointer; font-size:0.85rem;
+  font-family:var(--font-sans); margin-bottom:2px;
+}
+.nav-num{font-family:var(--font-mono); font-size:0.72rem; color:var(--ink-faint); width:20px; flex-shrink:0;}
+.nav-link:hover{background:var(--bg-panel); color:var(--ink);}
+.nav-link.active{background:var(--bg-panel); color:var(--ink); font-weight:600;}
+.nav-link.active .nav-num{color:var(--amber);}
+.sidebar-foot{margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--line-soft); font-size:0.76rem; color:var(--ink-faint); line-height:1.5;}
+
+main{min-width:0;}
+
+/* ============ Hero ============ */
+.hero{
+  background:var(--bg-raised); border:1px solid var(--line); border-radius:18px;
+  padding:2.1rem 2.3rem; margin-bottom:1.75rem; position:relative; overflow:hidden;
+}
+.hero::before{
+  content:""; position:absolute; top:-40%; right:-10%; width:420px; height:420px; border-radius:50%;
+  background:radial-gradient(circle, color-mix(in srgb, var(--amber) 16%, transparent), transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  display:inline-flex; align-items:center; gap:0.5rem; font-family:var(--font-mono); font-size:0.74rem;
+  color:var(--teal); border:1px solid color-mix(in srgb, var(--teal) 40%, transparent); padding:0.3rem 0.7rem;
+  border-radius:999px; margin-bottom:1rem;
+}
+.hero-eyebrow i{width:6px; height:6px; border-radius:50%; background:var(--teal); display:inline-block;}
+.hero h1{font-size:clamp(1.6rem, 2.6vw, 2.15rem); font-weight:700; letter-spacing:-0.02em; margin:0 0 0.75rem; max-width:34ch; position:relative;}
+.hero p{color:var(--ink-dim); font-size:1rem; max-width:62ch; margin:0 0 1.5rem; position:relative;}
+.hero-stats{display:flex; gap:0.85rem; flex-wrap:wrap; position:relative;}
+.stat{
+  background:var(--bg-panel); border:1px solid var(--line); border-radius:11px; padding:0.75rem 1.1rem; min-width:118px;
+}
+.stat b{display:block; font-family:var(--font-mono); font-size:1.3rem; color:var(--amber); font-weight:700;}
+.stat span{font-size:0.74rem; color:var(--ink-faint);}
+
+/* ============ Mobile tab strip ============ */
+.tabstrip{display:none;}
+
+/* ============ Stage ============ */
+.stage{margin-bottom:3.25rem; scroll-margin-top:90px;}
+.stage-head{display:flex; align-items:flex-start; gap:1rem; margin-bottom:0.6rem;}
+.stage-num{
+  font-family:var(--font-mono); font-size:1.5rem; font-weight:700; color:var(--line);
+  line-height:1; flex-shrink:0; -webkit-text-stroke: 1px var(--ink-faint); color:transparent;
+}
+.stage-eyebrow{display:block; font-family:var(--font-mono); font-size:0.72rem; color:var(--amber); margin-bottom:0.2rem;}
+.stage-head h3{font-size:1.35rem; font-weight:700; letter-spacing:-0.01em; margin:0;}
+.stage-desc{color:var(--ink-dim); max-width:76ch; margin:0 0 1.4rem; font-size:0.95rem;}
+.stage-desc em{color:var(--ink); font-style:normal; border-bottom:1px dashed var(--ink-faint);}
+
+/* table */
+.table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:12px; margin-bottom:1.6rem; background:var(--bg-raised);}
+.table-wrap table{border-collapse:collapse; width:100%; min-width:720px; font-size:0.84rem;}
+.table-wrap th{
+  text-align:left; padding:0.65rem 0.9rem; background:var(--bg-panel); color:var(--ink-dim); font-weight:600;
+  border-bottom:1px solid var(--line); font-size:0.76rem; white-space:nowrap;
+}
+.table-wrap td{padding:0.7rem 0.9rem; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+.table-wrap tr:last-child td{border-bottom:none;}
+.table-wrap td code{background:var(--bg-code); color:var(--teal); padding:0.1rem 0.35rem; border-radius:4px; font-size:0.8rem;}
+
+/* grid of cards */
+.grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(420px,1fr)); gap:1.1rem;}
+
+/* card */
+.card{
+  background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius); padding:1.3rem;
+  display:flex; flex-direction:column; gap:0.95rem; box-shadow:var(--shadow);
+}
+.card-head{display:flex; align-items:flex-start; gap:0.8rem;}
+.card-id{font-family:var(--font-mono); font-size:0.72rem; color:var(--ink-faint); border:1px solid var(--line); border-radius:6px; padding:0.15rem 0.4rem; flex-shrink:0; margin-top:0.15rem;}
+.card-heading{flex:1; min-width:0;}
+.card-heading h4{margin:0; font-size:1.05rem;}
+.card-heading h4 code{background:none; color:var(--ink); font-weight:700; font-size:1.05rem;}
+.card-heading p{margin:0.15rem 0 0; color:var(--ink-dim); font-size:0.85rem;}
+.chip{
+  font-size:0.7rem; font-family:var(--font-mono); color:var(--teal); border:1px solid color-mix(in srgb, var(--teal) 45%, transparent);
+  padding:0.25rem 0.55rem; border-radius:999px; white-space:nowrap; flex-shrink:0;
+}
+
+/* terminal block */
+.term{border-radius:10px; overflow:hidden; border:1px solid var(--line);}
+.term-bar{display:flex; align-items:center; gap:0.6rem; padding:0.45rem 0.7rem; background:var(--bg-panel); border-bottom:1px solid var(--line);}
+.term-dots{display:inline-flex; gap:4px;}
+.term-dots i{width:8px; height:8px; border-radius:50%; background:var(--line);}
+.term-label{font-size:0.72rem; color:var(--ink-faint); font-family:var(--font-mono); flex:1;}
+.copy-btn{
+  display:flex; align-items:center; gap:0.3rem; border:1px solid var(--line); background:var(--bg-raised); color:var(--ink-dim);
+  font-size:0.72rem; padding:0.25rem 0.55rem; border-radius:6px; cursor:pointer; font-family:var(--font-sans);
+}
+.copy-btn:hover{color:var(--amber); border-color:var(--amber);}
+.copy-btn.copied{color:var(--teal); border-color:var(--teal);}
+.term pre{
+  margin:0; padding:0.85rem 0.95rem; background:var(--bg-code); color:#d8e0ee; font-family:var(--font-mono);
+  font-size:0.82rem; overflow-x:auto; white-space:pre;
+}
+.term pre .prompt{color:var(--teal); margin-right:0.45rem; user-select:none;}
+.term-alt .term-bar{background:color-mix(in srgb, var(--blue) 10%, var(--bg-panel));}
+
+.card-body h5{margin:0 0 0.45rem; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-faint); font-weight:600;}
+.opts{margin:0; padding-left:1.15rem; display:flex; flex-direction:column; gap:0.4rem; font-size:0.86rem; color:var(--ink-dim);}
+.opts code{background:var(--bg-code); color:var(--amber); padding:0.05rem 0.32rem; border-radius:4px; font-size:0.81rem;}
+.opts strong{color:var(--rose);}
+
+.callout{
+  display:flex; gap:0.6rem; background:color-mix(in srgb, var(--amber) 9%, var(--bg-raised)); border:1px solid color-mix(in srgb, var(--amber) 30%, var(--line));
+  border-radius:10px; padding:0.75rem 0.9rem; font-size:0.84rem; color:var(--ink-dim);
+}
+.callout-ic{color:var(--amber); flex-shrink:0; margin-top:0.1rem;}
+.callout strong{color:var(--ink); font-weight:600;}
+.callout code{background:var(--bg-code); color:var(--amber); padding:0.05rem 0.32rem; border-radius:4px; font-size:0.8rem;}
+
+.pipe-note{margin:0; font-size:0.82rem; color:var(--ink-faint); padding-left:0.1rem;}
+.pipe-note code{background:var(--bg-code); color:var(--teal); padding:0.05rem 0.3rem; border-radius:4px;}
+
+/* methodology timeline */
+.timeline{display:flex; flex-direction:column; gap:0;}
+.step-item{
+  display:flex; gap:1rem; padding:1.1rem 0.3rem; border-bottom:1px solid var(--line-soft); cursor:pointer; position:relative;
+}
+.step-item:last-child{border-bottom:none;}
+.step-item input{position:absolute; opacity:0; pointer-events:none;}
+.step-check{
+  width:26px; height:26px; border-radius:50%; border:2px solid var(--line); flex-shrink:0; margin-top:0.1rem;
+  display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:0.72rem; color:var(--ink-faint);
+  transition:all .15s;
+}
+.step-item.checked .step-check{background:var(--teal); border-color:var(--teal); color:var(--bg);}
+.step-item.checked h5{color:var(--ink-faint); text-decoration:line-through; text-decoration-color:var(--ink-faint);}
+.step-item h5{margin:0 0 0.25rem; font-size:0.98rem; font-weight:600;}
+.step-item p{margin:0; color:var(--ink-dim); font-size:0.87rem;}
+.step-item p code{background:var(--bg-code); color:var(--teal); padding:0.05rem 0.3rem; border-radius:4px; font-size:0.82rem;}
+
+/* no results */
+.no-results{display:none; text-align:center; padding:4rem 1rem; color:var(--ink-dim);}
+.no-results h3{color:var(--ink); margin-bottom:0.5rem;}
+.no-results code{background:var(--bg-code); color:var(--amber); padding:0.1rem 0.4rem; border-radius:4px;}
+body.searching .stage:not(.has-match){display:none;}
+body.searching .card{display:none;}
+body.searching .card.match{display:flex;}
+body.searching .no-results.show{display:block;}
+body.searching .table-wrap{display:none;}
+
+footer{max-width:var(--maxw); margin:0 auto; padding:2rem 1.5rem 3rem; color:var(--ink-faint); font-size:0.8rem; border-top:1px solid var(--line-soft); text-align:center;}
+
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr; padding-top:1.25rem;}
+  .sidebar{display:none;}
+  .tabstrip{
+    display:flex; gap:0.4rem; overflow-x:auto; padding:0.9rem 1.5rem; max-width:var(--maxw); margin:0 auto;
+    border-bottom:1px solid var(--line);
+  }
+  .tabstrip::-webkit-scrollbar{display:none;}
+  .tabstrip .nav-link{white-space:nowrap; border:1px solid var(--line); flex-shrink:0;}
+  .topbar-search{display:none;}
+  .menu-btn{display:flex;}
+  .grid{grid-template-columns:1fr;}
+  .hero{padding:1.5rem 1.4rem;}
+}
+@media (max-width:560px){
+  .hero-stats{gap:0.5rem;}
+  .stat{min-width:0; flex:1; padding:0.6rem 0.7rem;}
+  .stat b{font-size:1.05rem;}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="mark">
+      <img class="mark-badge" src="3.png" alt="Logo Berkas Investigasi">
+      <div class="mark-text">
+        <strong>Berkas Investigasi</strong>
+        <span>L4L_Hack999</span>
+      </div>
+    </div>
+    <div class="topbar-search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" id="searchInput" placeholder="Cari perintah, tool, atau kata kunci…" autocomplete="off" />
+      <button class="clear-btn" id="clearSearch" aria-label="Hapus pencarian">&times;</button>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Menu tahap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" id="themeToggle" aria-label="Ganti tema">
+        <svg id="themeIconMoon" width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="tabstrip" id="tabstrip"></nav>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebarNav">
+  </aside>
+
+  <main id="mainContent">
+    <section class="hero">
+      <span class="hero-eyebrow"><i></i>Live Reference · Kali Linux</span>
+      <h1>Panduan investigasi CTF Digital Forensics</h1>
+      <p>Kumpulan command terminal yang paling sering dipakai pemain CTF: identifikasi berkas, decoding berlapis, steganografi gambar &amp; audio, file carving, bedah PCAP &amp; memory dump, hingga artefak sistem dan Android. Setiap command dilengkapi fungsi, opsi, indikasi penggunaan, dan one-liner siap pakai.</p>
+      <div class="hero-stats">
+        <div class="stat"><b>41+</b><span>Command &amp; Tool</span></div>
+        <div class="stat"><b>6</b><span>Tahap Investigasi</span></div>
+        <div class="stat"><b>1-klik</b><span>Salin Perintah</span></div>
+        <div class="stat"><b>ID</b><span>Bahasa Indonesia</span></div>
+      </div>
+    </section>
+
+    <div class="no-results" id="noResults">
+      <h3>Tidak ada command yang cocok</h3>
+      <p>Coba kata kunci lain, misalnya <code>png</code>, <code>xor</code>, <code>pcap</code>, <code>apk</code>, atau <code>volatility</code>.</p>
+    </div>
+
+<section class="stage" id="stage1" data-stage="stage1">
+      <div class="stage-head">
+        <span class="stage-num">01</span>
+        <div>
+          <span class="stage-eyebrow">Tahap 01</span>
+          <h3>Identifikasi File, Struktur Hex, Metadata & Timestamp</h3>
+        </div>
+      </div>
+      <p class="stage-desc">Jangan pernah memercayai ekstensi nama berkas di CTF. Validasi identitas asli berkas lewat <em>Magic Bytes</em>, periksa integritas chunk, serta baca seluruh metadata dan stempel waktu (MACB).</p>
+      <div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Format File</th>
+<th>Magic Bytes (Hex)</th>
+<th>ASCII</th>
+<th>Footer / Penutup</th>
+<th>Catatan Umum di CTF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PNG</strong></td>
+<td><code>89 50 4E 47 0D 0A 1A 0A</code></td>
+<td><code>.PNG....</code></td>
+<td><code>49 45 4E 44 AE 42 60 82</code> (<code>IEND</code>)</td>
+<td>Header sering dirusak, dimensi tinggi/lebar dikecilkan, atau disisipi file setelah <code>IEND</code>.</td>
+</tr>
+<tr>
+<td><strong>JPEG / JPG</strong></td>
+<td><code>FF D8 FF E0</code> / <code>FF D8 FF DB</code></td>
+<td><code>ÿØÿà</code> / <code>ÿØÿÛ</code></td>
+<td><code>FF D9</code></td>
+<td>Sering memakai metadata EXIF, thumbnail tersembunyi, atau steganografi <code>steghide</code>.</td>
+</tr>
+<tr>
+<td><strong>GIF</strong></td>
+<td><code>47 49 46 38 39 61</code></td>
+<td><code>GIF89a</code></td>
+<td><code>00 3B</code></td>
+<td>Flag sering tersembunyi di salah satu frame animasi (pecah dengan <code>convert</code>).</td>
+</tr>
+<tr>
+<td><strong>BMP</strong></td>
+<td><code>42 4D</code></td>
+<td><code>BM</code></td>
+<td>- (Ukuran di header)</td>
+<td>Jika header DIB berukuran 124 byte, konversi dulu ke PNG sebelum dipindai <code>zsteg</code>.</td>
+</tr>
+<tr>
+<td><strong>ZIP / DOCX / APK</strong></td>
+<td><code>50 4B 03 04</code></td>
+<td><code>PK..</code></td>
+<td><code>50 4B 05 06</code></td>
+<td>Paling sering ditempel di belakang gambar (<em>appended archive</em>).</td>
+</tr>
+<tr>
+<td><strong>GZIP / RAR / 7z</strong></td>
+<td><code>1F 8B</code> / <code>52 61 72 21</code> / <code>37 7A BC AF</code></td>
+<td><code>..</code> / <code>Rar!</code> / <code>7z¼¯</code></td>
+<td>-</td>
+<td>Sering berlapis-lapis (kompresi berulang ratusan kali).</td>
+</tr>
+<tr>
+<td><strong>PDF</strong></td>
+<td><code>25 50 44 46</code></td>
+<td><code>%PDF</code></td>
+<td><code>25 25 45 4F 46</code> (<code>%%EOF</code>)</td>
+<td>Teks flag sering ditutupi kotak hitam atau berada di dalam object stream terkompresi.</td>
+</tr>
+<tr>
+<td><strong>ELF (Linux Binary)</strong></td>
+<td><code>7F 45 4C 46</code></td>
+<td><code>.ELF</code></td>
+<td>-</td>
+<td>Program eksekusi Linux yang menyamar sebagai file data/gambar.</td>
+</tr>
+<tr>
+<td><strong>PCAP / PCAPNG</strong></td>
+<td><code>D4 C3 B2 A1</code> / <code>0A 0D 0D 0A</code></td>
+<td><code>ÔÃ²¡</code> / <code>....</code></td>
+<td>-</td>
+<td>Rekaman paket jaringan tanpa ekstensi <code>.pcap</code>.</td>
+</tr>
+<tr>
+<td><strong>SQLite Database</strong></td>
+<td><code>53 51 4C 69 74 65 20 66</code></td>
+<td><code>SQLite f</code></td>
+<td>-</td>
+<td>File database aplikasi/browser yang menyimpan tabel kredensial atau flag.</td>
+</tr>
+</tbody>
+</table></div>
+      <div class="grid">
+        <article class="card" data-search="file deteksi tipe asli magic bytes mime">
+        <div class="card-head">
+          <div class="card-id">01</div>
+          <div class="card-heading">
+            <h4><code>file</code></h4>
+            <p>— Deteksi Tipe Asli Berkas</p>
+          </div>
+          <span class="chip">Wajib Awal</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>file -b -i misteri_file</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>file</code>: Membaca <em>Magic Bytes</em> di awal berkas untuk menentukan format asli tanpa peduli ekstensi namanya.</li>
+<li><code>-b</code> (<em>brief</em>): Menampilkan hasil secara ringkas tanpa mengulang nama file.</li>
+<li><code>-i</code> (<em>mime</em>): Menampilkan tipe MIME (mis. <code>image/png</code>, <code>text/plain</code>) beserta charset-nya.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Selalu jalankan pertama kali pada setiap file soal, terutama file tanpa ekstensi (bernama <code>file</code> atau <code>data.bin</code>) atau file yang gagal dibuka.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>find . -maxdepth 3 -type f | xargs file -i | grep -v &quot;text/plain&quot;</pre>
+        </div>
+        <p class="pipe-note">Memindai seluruh file di direktori hingga kedalaman 3 folder dan menyaring file biner non-teks.</p>
+      </article>
+<article class="card" data-search="exiftool metadata exif comment author gps thumbnail">
+        <div class="card-head">
+          <div class="card-id">02</div>
+          <div class="card-heading">
+            <h4><code>exiftool</code></h4>
+            <p>— Ekstraksi Metadata & Tag Tersembunyi</p>
+          </div>
+          <span class="chip">Metadata</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>exiftool -a -u -g1 gambar.jpg</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-a</code> (<em>allow duplicates</em>): Menampilkan seluruh tag metadata meskipun memiliki nama duplikat.</li>
+<li><code>-u</code> (<em>unknown</em>): Menampilkan tag kustom atau tidak standar yang sering disisipkan pembuat soal.</li>
+<li><code>-g1</code> (<em>group</em>): Mengelompokkan metadata berdasarkan kategori lokasi (EXIF, XMP, File, Composite).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal melibatkan foto kamera, PNG, PDF, atau audio dengan petunjuk seperti <em>"who took this photo?"</em>, <em>"check author/GPS"</em>, atau ukuran file sedikit lebih besar dari resolusinya.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>exiftool -a -u target.png | grep -iE &quot;flag|ctf|pico|academy|comment|description|author|warning&quot;</pre>
+        </div>
+        <p class="pipe-note">Menyaring langsung baris metadata yang paling sering berisi petunjuk atau potongan flag.</p>
+      </article>
+<article class="card" data-search="xxd hexdump hex dump header footer magic bytes iend">
+        <div class="card-head">
+          <div class="card-id">03</div>
+          <div class="card-heading">
+            <h4><code>xxd / hexdump</code></h4>
+            <p>— Inspeksi Byte Hexadecimal & ASCII</p>
+          </div>
+          <span class="chip">Hex Analysis</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>xxd -l 64 -g 1 berkas_rusak.png
+<span class="prompt">$</span>hexdump -C -n 64 berkas_rusak.png</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-l 64</code> / <code>-n 64</code>: Membatasi output hanya 64 byte pertama agar layar terminal tidak penuh.</li>
+<li><code>-g 1</code> (<em>groupsize</em>): Mengelompokkan tampilan per 1 byte (2 digit hex) agar pencocokan <em>Magic Bytes</em> sangat jelas.</li>
+<li><code>-C</code> (<em>canonical</em>): Menampilkan kolom hex sekaligus terjemahan ASCII di sisi kanan pada <code>hexdump</code>.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Output <code>file</code> hanya bertuliskan <code>data</code>, muncul error <em>"unsupported image format"</em>, atau mengecek apakah ada data tambahan setelah footer file (<code>IEND</code> / <code>FF D9</code>).</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>xxd target.png | tail -n 15</pre>
+        </div>
+        <p class="pipe-note">Memeriksa 15 baris terakhir file untuk melihat apakah ada teks atau file lain setelah penutup <code>IEND</code>.</p>
+      </article>
+<article class="card" data-search="dd printf hexedit repair fix header magic bytes corrupted">
+        <div class="card-head">
+          <div class="card-id">04</div>
+          <div class="card-heading">
+            <h4><code>dd + printf / hexedit</code></h4>
+            <p>— Perbaikan Header Rusak</p>
+          </div>
+          <span class="chip">File Repair</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>printf &#x27;ÿØÿà&#x27; | dd of=rusak.jpg bs=1 seek=0 count=4 conv=notrunc
+<span class="prompt">$</span>hexedit rusak.jpg</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>printf 'ÿØ...'</code>: Mencetak byte mentah heksadesimal (contoh di atas untuk memperbaiki header JPEG).</li>
+<li><code>bs=1 seek=0 count=4</code>: Menulis tepat 4 byte mulai dari posisi byte ke-0 (awal file).</li>
+<li><code>conv=notrunc</code>: <strong>Sangat krusial!</strong> Mencegah <code>dd</code> memotong sisa isi berkas setelah byte yang ditimpa.</li>
+<li><code>hexedit</code>: Editor hex interaktif di terminal (ketik hex baru, lalu tekan <code>Ctrl+X</code> dan <code>Y</code> untuk menyimpan).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal berjudul <em>"Corrupted file"</em> atau file gambar/arsip memiliki byte awal yang diubah menjadi nol atau karakter acak.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>printf &#x27;PNG
+<span class="prompt">$</span>
+<span class="prompt">$</span>&#x27; | dd of=fix.png bs=1 seek=0 count=8 conv=notrunc &amp;&amp; file fix.png</pre>
+        </div>
+        <p class="pipe-note">Memperbaiki 8-byte signature PNG secara otomatis lalu langsung memverifikasi hasilnya dengan <code>file</code>.</p>
+      </article>
+<article class="card" data-search="pngcheck png chunk ihdr idat crc height width">
+        <div class="card-head">
+          <div class="card-id">05</div>
+          <div class="card-heading">
+            <h4><code>pngcheck</code></h4>
+            <p>— Validasi Chunk & Dimensi PNG</p>
+          </div>
+          <span class="chip">PNG Forensics</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>pngcheck -vtp7f gambar.png</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-v</code> (<em>verbose</em>): Menampilkan rincian offset setiap chunk (<code>IHDR</code>, <code>IDAT</code>, <code>tEXt</code>, <code>IEND</code>).</li>
+<li><code>-t</code> (<em>text</em>): Menampilkan isi seluruh chunk komentar teks di dalam PNG.</li>
+<li><code>-p</code> & <code>-7</code>: Menampilkan informasi palet dan karakter non-ASCII secara aman.</li>
+<li><code>-f</code> (<em>force</em>): Tetap melanjutkan inspeksi meskipun ditemukan <em>CRC checksum error</em>.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Bagian bawah gambar PNG tampak terpotong (nilai <em>Height</em> pada chunk <code>IHDR</code> sengaja dikecilkan pembuat soal) atau muncul galat CRC.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>pngcheck -v target.png | grep -iE &quot;CRC|IHDR|tEXt|error&quot;</pre>
+        </div>
+        <p class="pipe-note">Menyoroti chunk yang rusak, nilai dimensi asli, dan pesan teks tersembunyi di struktur PNG.</p>
+      </article>
+<article class="card" data-search="pdfinfo pdftotext qpdf pdf stream hidden text redact">
+        <div class="card-head">
+          <div class="card-id">06</div>
+          <div class="card-heading">
+            <h4><code>pdftotext / qpdf</code></h4>
+            <p>— Bedah Dokumen & Stream PDF</p>
+          </div>
+          <span class="chip">PDF Forensics</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>pdftotext dokumen.pdf -
+<span class="prompt">$</span>qpdf --qdf --object-streams=disable dokumen.pdf unpacked.pdf</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>pdftotext ... -</code>: Mengekstrak seluruh lapisan teks di dalam PDF langsung ke stdout terminal (<code>-</code>), menembus kotak hitam penutup teks.</li>
+<li><code>qpdf --qdf</code>: Mendekompresi stream biner internal PDF agar objek tersembunyi bisa dibaca dengan <code>strings</code> atau <code>grep</code>.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal berupa dokumen PDF dengan bagian teks yang disensor kotak hitam, teks berwarna putih di atas latar putih, atau gambar berlapis di dalam PDF.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>pdftotext dokumen.pdf - | grep -iE &quot;flag|ctf|pico|academy|\{.*\}&quot;</pre>
+        </div>
+        <p class="pipe-note">Mengekstrak teks tersembunyi di balik sensor PDF dan langsung menyaring format flag.</p>
+      </article>
+<article class="card" data-search="stat timestamp macb modified accessed changed birth">
+        <div class="card-head">
+          <div class="card-id">07</div>
+          <div class="card-heading">
+            <h4><code>stat</code></h4>
+            <p>— Analisis Stempel Waktu (MACB)</p>
+          </div>
+          <span class="chip">Timeline</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>stat berkas_target</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>stat</code>: Menampilkan informasi inode, ukuran blok, izin akses, serta timestamp lengkap (<em>Access, Modify, Change, Birth</em>) hingga presisi nanodetik.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Terdapat ratusan file identik di dalam folder dan soal menanyakan file mana yang terakhir disentuh/dimodifikasi, atau flag dikodekan pada angka milidetik timestamp.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>stat -c &quot;%y %n&quot; * | sort -r | head -n 10</pre>
+        </div>
+        <p class="pipe-note">Mengurutkan seluruh berkas di direktori berdasarkan waktu modifikasi paling baru lengkap dengan nanodetik.</p>
+      </article>
+<article class="card" data-search="ent entropy chi square keacakan enkripsi vs kompresi analysis">
+        <div class="card-head">
+          <div class="card-id">08</div>
+          <div class="card-heading">
+            <h4><code>ent</code></h4>
+            <p>— Analisis Tingkat Keacakan Data</p>
+          </div>
+          <span class="chip">Entropy Check</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>ent berkas_misterius.bin</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>ent</code>: Menghitung <em>entropy</em> (skala 0–8 bit per byte) dan uji statistik Chi-Square suatu berkas untuk menilai seberapa acak isinya.</li>
+<li>Entropy mendekati <code>8.0</code>: menandakan data terenkripsi, terkompresi, atau sudah memuat steganografi rapat — distribusi byte-nya nyaris seragam sempurna.</li>
+<li>Entropy jauh di bawah <code>8.0</code> (misalnya 4–6): menandakan teks, kode, atau gambar mentah yang belum diproses, sehingga payload tersembunyi dengan LSB klasik lebih mungkin ditemukan.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Jalankan sebelum memilih strategi lanjutan, untuk memutuskan apakah berkas layak dicoba dibongkar passphrase-nya atau cukup di-<em>decode</em> dengan <code>strings</code>/<code>base64</code>, serta untuk menandai segmen anomali di tengah berkas gabungan.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>for f in extracted_*/*; do echo -n &quot;$f: &quot;; ent &quot;$f&quot; | grep &#x27;Entropy =&#x27;; done</pre>
+        </div>
+        <p class="pipe-note">Memindai entropy seluruh berkas hasil carving sekaligus, agar kandidat berkas terenkripsi atau arsip tersembunyi cepat terlihat.</p>
+      </article>
+<article class="card" data-search="compare imagemagick diff gambar identik before after perbandingan piksel identify">
+        <div class="card-head">
+          <div class="card-id">09</div>
+          <div class="card-heading">
+            <h4><code>compare (ImageMagick)</code></h4>
+            <p>— Diffing Visual Dua Berkas Serupa</p>
+          </div>
+          <span class="chip">Image Diff</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>compare asli.png modifikasi.png -highlight-color red diff_hasil.png</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>compare</code>: Bagian dari paket ImageMagick, membandingkan dua gambar piksel demi piksel dan menghasilkan peta perbedaan visualnya.</li>
+<li><code>-highlight-color red</code>: menandai setiap piksel yang berbeda dengan warna merah agar langsung terlihat oleh mata.</li>
+<li>Versi numerik: <code>compare -metric AE asli.png modifikasi.png null: 2&gt;&amp;1</code> mencetak jumlah total piksel yang berbeda tanpa membuat gambar output.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal memberikan dua berkas gambar yang terlihat identik sekilas, misalnya bernama <code>before.png</code> &amp; <code>after.png</code>, atau <code>original</code> &amp; <code>edited</code> — flag biasanya disisipkan sebagai perubahan piksel kecil yang tidak kasat mata.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>compare asli.png modifikasi.png -metric AE -fuzz 5% diff.png; identify -verbose diff.png | grep -i &#x27;geometry&#x27;</pre>
+        </div>
+        <p class="pipe-note">Membuat peta perbedaan dengan toleransi noise 5% lalu langsung memeriksa statistik geometri area yang berubah.</p>
+      </article>
+      </div>
+    </section>
+<section class="stage" id="stage2" data-stage="stage2">
+      <div class="stage-head">
+        <span class="stage-num">02</span>
+        <div>
+          <span class="stage-eyebrow">Tahap 02</span>
+          <h3>Pencarian String, Filtering, OCR & Decoding Berlapis</h3>
+        </div>
+      </div>
+      <p class="stage-desc">Mengekstrak karakter teks dari file biner, menyaring pola regex flag, membaca teks dari gambar menggunakan OCR, serta menerjemahkan berbagai lapisan sandi (Base64, Base32, Hex, Biner, ROT13, XOR).</p>
+      <div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Jenis Encoding</th>
+<th>Ciri Karakteristik</th>
+<th>Contoh String</th>
+<th>Command Decode Cepat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Base64</strong></td>
+<td><code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>+</code>, <code>/</code>, akhiran <code>=</code> atau <code>==</code></td>
+<td><code>YWNhZGVteXtmbGFnfQ==</code></td>
+<td><code>echo "..." | base64 -d</code></td>
+</tr>
+<tr>
+<td><strong>Base32</strong></td>
+<td>Hanya huruf kapital <code>A-Z</code> dan angka <code>2-7</code>, akhiran <code>=</code></td>
+<td><code>MFRGGZDFNV4XUZLMMRQXIZL5</code></td>
+<td><code>echo "..." | base32 -d</code></td>
+</tr>
+<tr>
+<td><strong>Hexadecimal</strong></td>
+<td>Hanya angka <code>0-9</code> dan huruf <code>a-f</code>/<code>A-F</code> (jumlah genap)</td>
+<td><code>61636164656d797b666c61677d</code></td>
+<td><code>echo "..." | xxd -r -p</code></td>
+</tr>
+<tr>
+<td><strong>Binary Text</strong></td>
+<td>Hanya deretan angka <code>0</code> dan <code>1</code> (kelipatan 8 bit)</td>
+<td><code>01100110 01101100 01100001</code></td>
+<td><code>python3 -c 'import sys; ...'</code></td>
+</tr>
+<tr>
+<td><strong>ROT13 / Caesar</strong></td>
+<td>Struktur flag terlihat namun huruf tergeser (mis. <code>synt{...}</code>)</td>
+<td><code>synt{ebg13_synt}</code></td>
+<td><code>tr 'A-Za-z' 'N-ZA-Mn-za-m'</code></td>
+</tr>
+<tr>
+<td><strong>URL Encoding</strong></td>
+<td>Banyak simbol persen diikuti 2 digit hex (<code>%7B</code>, <code>%7D</code>)</td>
+<td><code>academy%7Burl_decode%7D</code></td>
+<td><code>python3 -c 'import urllib.parse,sys; print(urllib.parse.unquote(sys.stdin.read()))'</code></td>
+</tr>
+</tbody>
+</table></div>
+      <div class="grid">
+        <article class="card" data-search="strings ascii utf16le biner extract text">
+        <div class="card-head">
+          <div class="card-id">01</div>
+          <div class="card-heading">
+            <h4><code>strings</code></h4>
+            <p>— Ekstraksi Teks dari Berkas Biner</p>
+          </div>
+          <span class="chip">Wajib Awal</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>strings -n 6 -e s target.bin
+<span class="prompt">$</span>strings -n 6 -e l windows_dump.bin  # UTF-16LE (Windows)</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-n 6</code>: Hanya menampilkan urutan teks minimal 6 karakter untuk membuang karakter sampah biner.</li>
+<li><code>-e s</code>: Encoding 7/8-bit ASCII standar. Gunakan <code>-e l</code> untuk teks 16-bit <em>Little Endian</em> (sangat sering ditemukan pada memory dump & executable Windows).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Langkah wajib setelah <code>file</code> dan <code>exiftool</code> pada seluruh berkas biner, gambar, PCAP, maupun memory dump.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>strings -n 5 target.bin | grep -iE &quot;flag|ctf|pico|academy|htb|\{.*\}&quot;</pre>
+        </div>
+        <p class="pipe-note">Langsung menyaring kata kunci flag atau pola kurung kurawal dari jutaan baris string biner.</p>
+      </article>
+<article class="card" data-search="grep regex recursive cari pola flag">
+        <div class="card-head">
+          <div class="card-id">02</div>
+          <div class="card-heading">
+            <h4><code>grep</code></h4>
+            <p>— Pencarian Regex & Rekursif</p>
+          </div>
+          <span class="chip">Filtering</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>grep -rnEoa &quot;[a-zA-Z0-9_]+\{[a-zA-Z0-9_@!?-]+\}&quot; ./folder_ekstrak/</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-r</code> (<em>recursive</em>): Memindai seluruh file di dalam folder dan subfoldernya.</li>
+<li><code>-n</code>: Menampilkan nomor baris tempat pola ditemukan.</li>
+<li><code>-E</code>: Mengaktifkan <em>Extended Regular Expression</em>.</li>
+<li><code>-o</code> (<em>only-matching</em>): Hanya mencetak potongan teks yang cocok dengan pola (mencegah terminal macet jika flag berada di 1 baris berisi 1 juta karakter).</li>
+<li><code>-a</code> (<em>text</em>): Memperlakukan file biner seolah-olah file teks.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Setelah mengekstrak arsip berisi ratusan file log, kode sumber, atau direktori hasil mount disk image.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>strings -n 6 dump.raw | grep -i -C 3 &quot;password&quot;</pre>
+        </div>
+        <p class="pipe-note">Menampilkan kata <code>password</code> beserta 3 baris sebelum dan sesudahnya (<code>-C 3</code>) untuk membaca konteks kredensial.</p>
+      </article>
+<article class="card" data-search="awk sed tr rev sort uniq manipulasi teks baris balik">
+        <div class="card-head">
+          <div class="card-id">03</div>
+          <div class="card-heading">
+            <h4><code>awk / tr / rev / uniq</code></h4>
+            <p>— Manipulasi & Pembersihan Teks</p>
+          </div>
+          <span class="chip">Text Wrangling</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>awk &#x27;{print $NF}&#x27; kolom.txt | tr -d &#x27;
+<span class="prompt">$</span>
+<span class="prompt">$</span> &#x27; | rev</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>awk '{print $NF}'</code>: Mengambil kolom paling terakhir dari setiap baris.</li>
+<li><code>tr -d '
+
+ '</code>: Menghapus newline dan spasi agar pecahan karakter menyatu menjadi satu string utuh.</li>
+<li><code>rev</code>: Membalik urutan karakter per baris (mis. <code>}galf{FTC</code> → <code>CTF{flag}</code>).</li>
+<li><code>sort | uniq -c | sort -n</code>: Menghitung frekuensi kemunculan baris untuk menemukan baris anomali yang hanya muncul 1 kali.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Pecahan flag tersebar di kolom log tertentu, dipisah per baris, ditulis terbalik, atau tersembunyi di antara ribuan baris log identik.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>sort log_besar.txt | uniq -c | sort -n | head -n 10</pre>
+        </div>
+        <p class="pipe-note">Menampilkan 10 baris paling langka/unik di dalam file log raksasa.</p>
+      </article>
+<article class="card" data-search="base64 base32 xxd -r -p decode hex binary">
+        <div class="card-head">
+          <div class="card-id">04</div>
+          <div class="card-heading">
+            <h4><code>base64 / xxd -r -p</code></h4>
+            <p>— Decoding Base64, Base32 & Hex</p>
+          </div>
+          <span class="chip">Decoding</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>base64 -d payload.b64 &gt; hasil.bin &amp;&amp; file hasil.bin
+<span class="prompt">$</span>echo &quot;61636164656d797b6865787d&quot; | xxd -r -p; echo &quot;&quot;</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>base64 -d</code> / <code>base32 -d</code>: Mendekode data tersandi Base64/Base32 kembali ke bentuk teks atau file biner aslinya.</li>
+<li><code>xxd -r -p</code>: Melakukan <em>reverse</em> (<code>-r</code>) dari format <em>plain hex dump</em> (<code>-p</code>) menjadi byte/teks asli.</li>
+<li>Format lain yang sering muncul berdampingan: <code>base32 -d</code> untuk Base32, <code>basenc --base32 -d</code> pada sistem yang tidak punya <code>base32</code> tersendiri, serta decoder Base58/Base85 biasanya ditangani lewat skrip <code>python3</code> singkat.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Menemukan blok teks panjang berakhiran <code>=</code> (Base64/32) atau deretan string heksadesimal panjang seperti pada bilah bawah gambar <em>Flag in Flame</em>.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>cat hex_panjang.txt | tr -d &#x27; 
+<span class="prompt">$</span>&#x27; | xxd -r -p &gt; out.bin &amp;&amp; file out.bin</pre>
+        </div>
+        <p class="pipe-note">Membersihkan spasi/baris baru pada string hex lalu mengubahnya menjadi berkas biner dan langsung mengecek formatnya.</p>
+      </article>
+<article class="card" data-search="tesseract ocr baca teks gambar hex png">
+        <div class="card-head">
+          <div class="card-id">05</div>
+          <div class="card-heading">
+            <h4><code>tesseract</code></h4>
+            <p>— Ekstraksi Teks dari Gambar (OCR)</p>
+          </div>
+          <span class="chip">Optical OCR</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>tesseract gambar_teks.png stdout --psm 6</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>tesseract</code>: Mesin <em>Optical Character Recognition</em> (OCR) untuk membaca tulisan yang tercetak di dalam gambar.</li>
+<li><code>stdout</code>: Mencetak hasil pembacaan langsung ke terminal tanpa membuat file <code>.txt</code> baru.</li>
+<li><code>--psm 6</code> / <code>--psm 7</code>: Mengatur mode segmentasi halaman (<code>6</code> untuk blok teks seragam, <code>7</code> untuk satu baris teks tunggal).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Flag atau string hex/Base64 sangat panjang ditulis sebagai grafik piksel di dalam gambar (seperti bilah hex di bagian bawah gambar) sehingga rawan salah ketik jika dibaca manual.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>convert full.png -gravity South -crop 100%x8%+0+0 -negate bar.png &amp;&amp; tesseract bar.png stdout --psm 7</pre>
+        </div>
+        <p class="pipe-note">Memotong 8% bagian paling bawah gambar, membalik kontras warnanya, dan langsung membaca teksnya dengan OCR.</p>
+      </article>
+<article class="card" data-search="python3 xor rot13 binary digits.bin brute force single byte">
+        <div class="card-head">
+          <div class="card-id">06</div>
+          <div class="card-heading">
+            <h4><code>python3 (One-Liner)</code></h4>
+            <p>— Decoder Biner, ROT13 & Bitwise XOR</p>
+          </div>
+          <span class="chip">Swiss Army Knife</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>python3 -c &#x27;import codecs; print(codecs.decode(&quot;synt{ebg13}&quot;, &quot;rot_13&quot;))&#x27;
+<span class="prompt">$</span>python3 -c &#x27;a=b&quot;YO[\N\ME&quot;; b=b&quot;8,:8+14&gt;&quot;; print(bytes(x^y for x,y in zip(a,b)))&#x27;</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>python3 -c '...'</code>: Mengeksekusi logika kriptografi atau konversi bit secara instan di terminal.</li>
+<li><code>x ^ y</code>: Operasi <em>Bitwise XOR</em> antar dua string atau brute-force kunci XOR 1-byte (<code>range(256)</code>).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> File berisi teks biner <code>0</code> dan <code>1</code> (seperti <code>digits.bin</code>), sandi ROT13, atau payload yang disamarkan dengan operasi XOR (seperti pada <em>Very very very Hidden</em>).</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>tr -d &#x27; 
+<span class="prompt">$</span>&#x27; &lt; digits.bin | python3 -c &#x27;import sys; d=sys.stdin.read(); sys.stdout.buffer.write(int(d,2).to_bytes(len(d)//8,&quot;big&quot;))&#x27; &gt; out.jpg &amp;&amp; file out.jpg</pre>
+        </div>
+        <p class="pipe-note">Mengubah deretan teks karakter <code>0</code> dan <code>1</code> menjadi file biner asli (JPEG/PNG) dalam satu baris perintah.</p>
+      </article>
+<article class="card" data-search="xortool xor key length cracking known plaintext repeating key">
+        <div class="card-head">
+          <div class="card-id">07</div>
+          <div class="card-heading">
+            <h4><code>xortool</code></h4>
+            <p>— Mencari Kunci XOR yang Tidak Diketahui</p>
+          </div>
+          <span class="chip">XOR Cracking</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>xortool -l 6 -c 20 payload_terenkripsi.bin</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>xortool</code>: Menebak panjang kunci XOR berulang dengan menganalisis byte yang paling sering muncul, berasumsi plaintext asli mengandung banyak byte <code>0x00</code> atau spasi.</li>
+<li><code>-l 6</code>: Memaksa pencarian hanya pada panjang kunci 6 byte; kosongkan agar otomatis mencoba 1 sampai 32.</li>
+<li><code>-c 20</code>: Memberi tahu bahwa karakter paling umum pada plaintext asli adalah byte <code>0x20</code> (spasi), sehingga kalkulasi kunci menjadi lebih akurat.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Berkas biner hasil ekstraksi tidak cocok dengan tipe apa pun menurut <code>file</code>, tetapi entropy-nya sedang (bukan terenkripsi penuh) — ciri khas data yang disamarkan dengan satu kunci XOR berulang.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>xortool-xor -s &#x27;flag{&#x27; -f payload.bin | head -c 40</pre>
+        </div>
+        <p class="pipe-note">Mencari posisi dan kunci XOR dengan mengasumsikan hasil akhirnya pasti memuat potongan teks "flag{" yang sudah diketahui sebelumnya (known-plaintext attack).</p>
+      </article>
+      </div>
+    </section>
+<section class="stage" id="stage3" data-stage="stage3">
+      <div class="stage-head">
+        <span class="stage-num">03</span>
+        <div>
+          <span class="stage-eyebrow">Tahap 03</span>
+          <h3>Steganografi (Gambar, Lapisan Piksel & Audio)</h3>
+        </div>
+      </div>
+      <p class="stage-desc">Mendeteksi dan mengekstrak pesan, skrip, maupun file yang disisipkan di balik bit piksel warna (LSB/MSB), koefisien JPEG, maupun frekuensi spektrum suara.</p>
+      
+      <div class="grid">
+        <article class="card" data-search="zsteg lsb msb png bmp pixel color plane">
+        <div class="card-head">
+          <div class="card-id">01</div>
+          <div class="card-heading">
+            <h4><code>zsteg</code></h4>
+            <p>— Deteksi LSB/MSB Otomatis (PNG & BMP)</p>
+          </div>
+          <span class="chip">Image Stego</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>zsteg -a gambar.png
+<span class="prompt">$</span>zsteg -E &quot;b1,rgb,lsb,xy&quot; gambar.png &gt; extracted_payload.bin</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-a</code> (<em>all</em>): Menguji seluruh kombinasi bit (LSB/MSB), urutan kanal (RGB/BGR/RGBA), dan arah pemindaian piksel.</li>
+<li><code>-E "..."</code> (<em>extract</em>): Mengekstrak payload mentah dari kanal spesifik yang terdeteksi ke dalam file baru.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Berkas berformat <code>.png</code> atau <code>.bmp</code> dengan kata kunci <em>"pixels"</em>, <em>"bits"</em>, <em>"invisible"</em>, atau <em>"LSB"</em>.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>zsteg -a gambar.png | grep -iE &quot;text|flag|ctf|pico|academy|zip|elf|powershell&quot;</pre>
+        </div>
+        <p class="pipe-note">Menyaring hasil ratusan kombinasi bit agar hanya menampilkan temuan yang bermakna.</p>
+      </article>
+<article class="card" data-search="convert imagemagick bmp png dib_hdr_size 124 separate channel negate">
+        <div class="card-head">
+          <div class="card-id">02</div>
+          <div class="card-heading">
+            <h4><code>convert (ImageMagick)</code></h4>
+            <p>— Konversi Lossless & Pisah Kanal Warna</p>
+          </div>
+          <span class="chip">Bit-Plane Fix</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>convert output.bmp output.png &amp;&amp; zsteg -a output.png
+<span class="prompt">$</span>convert gambar.png -separate channel_%d.png</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>convert output.bmp output.png</code>: Mengatasi galat <code>dib_hdr_size 124 unsupported</code> pada <code>zsteg</code> dengan mengonversi BMP Windows V5 menjadi PNG secara <em>lossless</em>.</li>
+<li><code>-separate</code>: Memisahkan gambar menjadi lapisan kanal Merah (<code>0</code>), Hijau (<code>1</code>), dan Biru (<code>2</code>) untuk inspeksi visual pengganti Stegsolve.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> <code>zsteg</code> mengalami crash saat membaca file <code>.bmp</code> modern, atau saat ingin melihat tulisan tersembunyi pada satu kanal warna tertentu.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>convert gambar.png -channel R -separate -threshold 50% red_plane.png &amp;&amp; xdg-open red_plane.png</pre>
+        </div>
+        <p class="pipe-note">Mengekstrak lapisan warna merah dengan ambang kontras tinggi untuk memunculkan teks tersembunyi.</p>
+      </article>
+<article class="card" data-search="steghide stegseek jpeg wav passphrase crack brute force rockyou">
+        <div class="card-head">
+          <div class="card-id">03</div>
+          <div class="card-heading">
+            <h4><code>steghide & stegseek</code></h4>
+            <p>— Ekstraksi & Cracking Stego JPEG/WAV</p>
+          </div>
+          <span class="chip">Brute-Force</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>steghide extract -sf foto.jpg -p &quot;&quot;
+<span class="prompt">$</span>stegseek --crack foto.jpg /usr/share/wordlists/rockyou.txt</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>extract -sf foto.jpg -p ""</code>: Mencoba mengekstrak payload dari JPEG/BMP/WAV menggunakan kata sandi kosong (<code>""</code>).</li>
+<li><code>stegseek --crack</code>: Memecahkan kata sandi <code>steghide</code> dengan kecepatan jutaan password per detik menggunakan <code>rockyou.txt</code>.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal menggunakan gambar <code>.jpg</code> atau audio <code>.wav</code>, terutama jika ada petunjuk kata sandi di log/metadata atau membutuhkan brute-force wordlist.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>stegseek --seed foto.jpg</pre>
+        </div>
+        <p class="pipe-note">Memeriksa apakah berkas media mengandung payload <code>steghide</code> tanpa perlu wordlist.</p>
+      </article>
+<article class="card" data-search="outguess dct jpeg steganography retrieve">
+        <div class="card-head">
+          <div class="card-id">04</div>
+          <div class="card-heading">
+            <h4><code>outguess</code></h4>
+            <p>— Ekstraksi Steganografi DCT JPEG</p>
+          </div>
+          <span class="chip">JPEG DCT</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>outguess -r foto.jpg hasil_outguess.txt
+<span class="prompt">$</span>outguess -k &quot;kunci_rahasia&quot; -r foto.jpg hasil_outguess.txt</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-r</code> (<em>retrieve</em>): Mengambil kembali pesan yang disisipkan pada koefisien <em>Discrete Cosine Transform</em> (DCT) JPEG.</li>
+<li><code>-k "..."</code>: Menentukan kunci dekripsi (hilangkan flag <code>-k</code> jika diekstrak tanpa kunci).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Gambar <code>.jpg</code> tidak menghasilkan apa-apa di <code>exiftool</code> maupun <code>steghide</code>, atau deskripsi soal menyebut kata <em>"guess"</em>.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>outguess -r foto.jpg - | strings -n 5</pre>
+        </div>
+        <p class="pipe-note">Mengekstrak output langsung ke stdout dan menyaring string teks terbaca.</p>
+      </article>
+<article class="card" data-search="python3 pil invoke-psimage blue green nibble 4-bit lsb">
+        <div class="card-head">
+          <div class="card-id">05</div>
+          <div class="card-heading">
+            <h4><code>python3 (PIL / PSImage)</code></h4>
+            <p>— Ekstraktor 4-Bit Nibble (Blue & Green)</p>
+          </div>
+          <span class="chip">Advanced Stego</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>python3 -c &#x27;from PIL import Image; im=Image.open(&quot;evil_duck.png&quot;); px=list(im.getdata()); out=bytes(((b&amp;15)&lt;&lt;4)|(g&amp;15) for r,g,b,*_ in px); open(&quot;ps_script.bin&quot;,&quot;wb&quot;).write(out)&#x27; &amp;&amp; strings -n 8 ps_script.bin | head</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>((b &amp; 15) &lt;&lt; 4) | (g &amp; 15)</code>: Mengambil 4 bit terbawah kanal Biru sebagai <em>upper nibble</em> dan 4 bit terbawah kanal Hijau sebagai <em>lower nibble</em> (ciri khas tool <strong>Invoke-PSImage</strong>).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Gambar PNG memiliki selisih nilai piksel maksimal <code>15</code> (4-bit) dibanding gambar asli, atau ditemukan petunjuk <code>powershell</code> pada PCAP/log (seperti soal <em>Very very very Hidden</em>).</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>strings -n 6 ps_script.bin | grep -iE &quot;flag|ctf|academy|bxor|string&quot;</pre>
+        </div>
+        <p class="pipe-note">Langsung memeriksa variabel dan operasi XOR di dalam skrip PowerShell yang berhasil diekstrak dari piksel gambar.</p>
+      </article>
+<article class="card" data-search="sox spectrogram audio wav zbarimg qr code barcode">
+        <div class="card-head">
+          <div class="card-id">06</div>
+          <div class="card-heading">
+            <h4><code>sox & zbarimg</code></h4>
+            <p>— Spektrogram Audio & Pembaca QR Code</p>
+          </div>
+          <span class="chip">Audio & QR</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>sox suara.wav -n spectrogram -o spektrogram.png
+<span class="prompt">$</span>zbarimg -q --raw qr_flag.png</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>sox ... -n spectrogram</code>: Merender gelombang frekuensi audio ke gambar PNG sehingga tulisan flag yang digambar di frekuensi tinggi terlihat jelas.</li>
+<li><code>zbarimg -q --raw</code>: Memindai dan mencetak isi QR Code atau Barcode mentah langsung di terminal.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Berkas audio terdengar berdesis/beep aneh di nada tinggi, atau hasil pemisahan kanal gambar menghasilkan QR Code (termasuk yang warnanya terbalik).</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>sox suara.wav -n remix 1 spectrogram -o ch1.png &amp;&amp; convert inverted_qr.png -negate fixed.png &amp;&amp; zbarimg --raw fixed.png</pre>
+        </div>
+        <p class="pipe-note">Membuat spektrogram khusus kanal audio kiri (<code>remix 1</code>) dan membaca QR Code yang warnanya dinegasikan.</p>
+      </article>
+<article class="card" data-search="ffmpeg ffprobe video forensik frame extraction audio stream mp4 mkv">
+        <div class="card-head">
+          <div class="card-id">07</div>
+          <div class="card-heading">
+            <h4><code>ffmpeg / ffprobe</code></h4>
+            <p>— Bedah Frame Video &amp; Audio Tersembunyi</p>
+          </div>
+          <span class="chip">Video Forensics</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>ffmpeg -i video_mencurigakan.mp4 -vf fps=1 frame_%04d.png</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>ffmpeg</code>: Mengekstrak setiap frame video menjadi gambar diam agar dapat dipindai satu per satu dengan <code>zsteg</code>/<code>strings</code>, atau diperiksa manual mencari QR Code maupun teks sekilas.</li>
+<li><code>-vf fps=1</code>: Mengambil satu frame setiap satu detik durasi video; perbesar angkanya (misalnya <code>fps=10</code>) untuk sampling yang lebih rapat.</li>
+<li><code>ffprobe -show_streams -show_format video.mp4</code>: Menampilkan metadata lengkap berupa codec, durasi, serta stream tersembunyi atau subtitle sebelum ekstraksi dimulai.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal memberikan berkas video (<code>.mp4</code>, <code>.mkv</code>, <code>.avi</code>) — flag sering disembunyikan pada satu frame spesifik, pada track audio kedua, atau pada metadata container itu sendiri.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>ffmpeg -i video.mp4 -vf fps=1 frame_%04d.png &amp;&amp; zbarimg frame_*.png 2&gt;/dev/null | grep -i &#x27;QR-Code&#x27;</pre>
+        </div>
+        <p class="pipe-note">Mengekstrak seluruh frame lalu langsung memindai setiap gambar untuk mencari QR Code yang mungkin hanya muncul sekilas.</p>
+      </article>
+<article class="card" data-search="stegolsb wavsteg lsb audio wav hidden data bit reveal">
+        <div class="card-head">
+          <div class="card-id">08</div>
+          <div class="card-heading">
+            <h4><code>stegolsb (wavsteg)</code></h4>
+            <p>— LSB Steganografi pada Audio WAV</p>
+          </div>
+          <span class="chip">Audio Stego</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>stegolsb wavsteg -r -i suara_curiga.wav -o hasil_lsb.txt -n 1</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>stegolsb</code>: Tool Python untuk membaca atau menulis data pada bit paling tidak signifikan (LSB) tiap sampel audio WAV, cara kerjanya mirip <code>zsteg</code> namun khusus audio.</li>
+<li><code>wavsteg -r</code>: Mode <em>reveal</em> alias ekstraksi, kebalikan dari mode <code>-h</code> (hide) untuk menyembunyikan data.</li>
+<li><code>-n 1</code>: Jumlah bit LSB yang dibaca dari setiap sampel; coba naikkan bertahap ke 2, 3, atau 4 jika hasil pertama berupa data sampah.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Berkas audio berformat <code>.wav</code> saja — bukan <code>.mp3</code>, karena kompresi lossy pada MP3 merusak data LSB — yang berukuran tidak wajar besar untuk durasinya, atau soal secara eksplisit menyebut "dengarkan baik-baik".</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>stegolsb wavsteg -r -i suara.wav -o out.bin -n 2 &amp;&amp; file out.bin &amp;&amp; strings out.bin | grep -i flag</pre>
+        </div>
+        <p class="pipe-note">Mengekstrak 2-bit LSB dari setiap sampel lalu langsung memeriksa apakah hasilnya berupa berkas lain atau teks flag.</p>
+      </article>
+      </div>
+    </section>
+<section class="stage" id="stage4" data-stage="stage4">
+      <div class="stage-head">
+        <span class="stage-num">04</span>
+        <div>
+          <span class="stage-eyebrow">Tahap 04</span>
+          <h3>File Carving, Ekstraksi Berkas Tertanam & Perbaikan Arsip</h3>
+        </div>
+      </div>
+      <p class="stage-desc">Memisahkan berkas yang digabungkan menjadi satu file, memulihkan data terhapus dari raw image, serta menangani arsip kompresi berlapis atau rusak.</p>
+      
+      <div class="grid">
+        <article class="card" data-search="binwalk extract embedded file carving signature">
+        <div class="card-head">
+          <div class="card-id">01</div>
+          <div class="card-heading">
+            <h4><code>binwalk</code></h4>
+            <p>— Pemindaian & Ekstraksi File Tertanam</p>
+          </div>
+          <span class="chip">Carving Utama</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>binwalk -e --dd=&quot;.*&quot; gambar_mencurigakan.png</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-e</code> (<em>extract</em>): Mengekstrak otomatis semua signature berkas yang dikenali ke folder <code>_namafile.extracted/</code>.</li>
+<li><code>--dd=".*"</code>: Memaksa carving seluruh jenis signature yang ditemukan di dalam berkas.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Ukuran berkas gambar/audio jauh lebih besar dari wajarnya, atau sebagai pengecekan wajib pada setiap file media.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>binwalk target.png | grep -vE &quot;Zlib|TIFF&quot;</pre>
+        </div>
+        <p class="pipe-note">Menyaring blok kompresi Zlib bawaan PNG agar hanya signature file tambahan yang terlihat.</p>
+      </article>
+<article class="card" data-search="foremost scalpel file carving header footer raw disk">
+        <div class="card-head">
+          <div class="card-id">02</div>
+          <div class="card-heading">
+            <h4><code>foremost / scalpel</code></h4>
+            <p>— Carving Berbasis Header & Footer</p>
+          </div>
+          <span class="chip">Deep Carving</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>foremost -i gabungan.bin -o hasil_carve/</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-i</code>: Berkas input yang akan dipindai.</li>
+<li><code>-o</code>: Folder output yang otomatis memilah hasil carving berdasarkan ekstensi (<code>png/</code>, <code>zip/</code>, <code>pdf/</code>, dan laporan <code>audit.txt</code>).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> <code>binwalk</code> gagal mengekstrak berkas secara bersih, atau saat memulihkan banyak file dari <em>raw disk image</em> / <em>memory dump</em>.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>foremost -i disk.dd -o carved/ &amp;&amp; cat carved/audit.txt</pre>
+        </div>
+        <p class="pipe-note">Menjalankan pemulihan file dan langsung mencetak ringkasan file apa saja yang ditemukan.</p>
+      </article>
+<article class="card" data-search="dd skip offset potong byte manual ekstrak">
+        <div class="card-head">
+          <div class="card-id">03</div>
+          <div class="card-heading">
+            <h4><code>dd (Offset Slicing)</code></h4>
+            <p>— Pemotongan File Manual via Offset</p>
+          </div>
+          <span class="chip">Precision Cut</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>dd if=gambar_gabungan.jpg of=rahasia.zip bs=1 skip=45820</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>bs=1</code>: Mengatur ukuran blok ke 1 byte agar angka <code>skip</code> sama persis dengan offset desimal dari <code>binwalk</code>.</li>
+<li><code>skip=45820</code>: Melewati 45.820 byte pertama dan menyalin sisanya menjadi file baru.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> <code>binwalk</code> menunjukkan adanya arsip di offset tertentu tetapi gagal mengekstraknya karena nama/struktur arsip dimodifikasi.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>binwalk target.png | awk &#x27;/Zip/ {print $1}&#x27; | xargs -I {} dd if=target.png of=extracted.zip bs=1 skip={}</pre>
+        </div>
+        <p class="pipe-note">Otomatis mengambil offset desimal ZIP dari <code>binwalk</code> dan memotongnya ke file <code>extracted.zip</code>.</p>
+      </article>
+<article class="card" data-search="7z gunzip tar zip -ff rusak end of central directory">
+        <div class="card-head">
+          <div class="card-id">04</div>
+          <div class="card-heading">
+            <h4><code>7z / gunzip / zip -FF</code></h4>
+            <p>— Ekstraksi Paksa & Perbaikan Arsip</p>
+          </div>
+          <span class="chip">Archive Recovery</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>7z x arsip_rusak.zip -ooutput_folder/
+<span class="prompt">$</span>zip -FF rusak.zip --out diperbaiki.zip
+<span class="prompt">$</span>gunzip -k disk.flag.img.gz</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>7z x ... -ofolder/</code>: Jauh lebih toleran daripada <code>unzip</code> saat menghadapi struktur arsip yang terpotong sebagian.</li>
+<li><code>zip -FF</code> (<em>fix-fix</em>): Membangun ulang <em>Central Directory</em> arsip ZIP yang rusak.</li>
+<li><code>gunzip -k</code> (<em>keep</em>): Mendekompresi <code>.gz</code> tanpa menghapus file terkompresi aslinya.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Muncul galat <code>End-of-central-directory signature not found</code> saat menjalankan <code>unzip</code>, atau saat mendekompresi file <code>.img.gz</code> / <code>.tar.xz</code>.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>7z l arsip.7z | grep -iE &quot;flag|txt|secret|key&quot;</pre>
+        </div>
+        <p class="pipe-note">Mengintip daftar isi arsip (<code>l</code>) tanpa mengekstrak seluruh file raksasa di dalamnya.</p>
+      </article>
+<article class="card" data-search="bulk_extractor mass carving disk image memory dump email url domain">
+        <div class="card-head">
+          <div class="card-id">05</div>
+          <div class="card-heading">
+            <h4><code>bulk_extractor</code></h4>
+            <p>— Pemulihan Cepat Semua Jenis Data</p>
+          </div>
+          <span class="chip">Mass Carving</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>bulk_extractor -o hasil_bulk/ disk_image.dd</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>bulk_extractor</code>: Memindai berkas mentah apa pun — disk image, memory dump, atau file gabungan — mencari pola data bernilai forensik secara paralel, seperti alamat email, URL, nomor kartu, dan domain, tanpa perlu memahami struktur filesystem-nya.</li>
+<li><code>-o hasil_bulk/</code>: Folder output tempat seluruh laporan (<code>email.txt</code>, <code>url.txt</code>, <code>domain.txt</code>, dan lainnya) disimpan.</li>
+<li>Jauh lebih cepat dibanding <code>foremost</code> pada image berukuran besar karena memproses secara multi-thread dan tidak bergantung pada struktur partisi yang valid.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Berkas bukti berukuran besar seperti disk image atau memory dump, dan kombinasi <code>binwalk</code> plus <code>foremost</code> sudah dicoba namun belum menemukan petunjuk — gunakan sebagai sapuan menyeluruh tahap akhir.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>bulk_extractor -o hasil_bulk/ dump.raw &amp;&amp; grep -iE &#x27;flag|ctf&#x27; hasil_bulk/*.txt</pre>
+        </div>
+        <p class="pipe-note">Menjalankan pemindaian penuh lalu langsung menyaring seluruh laporan hasil ekstraksi mencari kata kunci flag.</p>
+      </article>
+      </div>
+    </section>
+<section class="stage" id="stage5" data-stage="stage5">
+      <div class="stage-head">
+        <span class="stage-num">05</span>
+        <div>
+          <span class="stage-eyebrow">Tahap 05</span>
+          <h3>Arsip Terkunci, Jaringan (PCAP), Disk Image & Memory Dump</h3>
+        </div>
+      </div>
+      <p class="stage-desc">Teknik forensik tingkat lanjut untuk membobol arsip ber-password, menganalisis tangkapan paket jaringan, membedah partisi disk serta slack space, dan menginvestigasi RAM.</p>
+      
+      <div class="grid">
+        <article class="card" data-search="zip2john john fcrackzip hashcat password zip rar 7z">
+        <div class="card-head">
+          <div class="card-id">01</div>
+          <div class="card-heading">
+            <h4><code>zip2john / john / fcrackzip</code></h4>
+            <p>— Cracking Password Arsip</p>
+          </div>
+          <span class="chip">Password Crack</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>zip2john terkunci.zip &gt; zip.hash &amp;&amp; john --wordlist=/usr/share/wordlists/rockyou.txt zip.hash
+<span class="prompt">$</span>fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt terkunci.zip</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>zip2john</code> (juga tersedia <code>7z2john</code> dan <code>rar2john</code>): Mengekstrak hash enkripsi arsip untuk dipecahkan oleh <em>John the Ripper</em>.</li>
+<li><code>fcrackzip -u -D -p</code>: Melakukan serangan kamus (<code>-D</code>) langsung pada file ZIP dan memvalidasi hasil dengan unzip (<code>-u</code>).</li>
+<li>Keluarga <code>*2john</code> lain yang sepadan: <code>rar2john</code> untuk RAR, <code>pdf2john.pl</code> untuk PDF ber-password, dan <code>ssh2john</code> untuk private key SSH terenkripsi — semuanya menghasilkan hash siap pakai untuk <code>john</code>.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> File hasil ekstraksi berupa arsip <code>.zip</code>, <code>.7z</code>, atau <code>.rar</code> yang meminta password tanpa petunjuk di dalam soal.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>john --show zip.hash | awk -F&#x27;:&#x27; &#x27;{print $2}&#x27;</pre>
+        </div>
+        <p class="pipe-note">Mencetak kata sandi yang sudah berhasil dipecahkan dalam format bersih.</p>
+      </article>
+<article class="card" data-search="tshark pcap wireshark http dns export objects follow stream">
+        <div class="card-head">
+          <div class="card-id">02</div>
+          <div class="card-heading">
+            <h4><code>tshark</code></h4>
+            <p>— Investigasi Lalu Lintas Paket (PCAP)</p>
+          </div>
+          <span class="chip">Network Forensics</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>tshark -r traffic.pcap -q -z io,phs
+<span class="prompt">$</span>tshark -r traffic.pcap --export-objects &quot;http,http_obj/&quot; -q</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>-z io,phs</code>: Menampilkan <em>Protocol Hierarchy Statistics</em> untuk melihat protokol apa saja yang ada di PCAP dalam hitungan detik.</li>
+<li><code>--export-objects "http,folder/"</code>: Mengekstrak seluruh file yang diunduh lewat HTTP (gambar, dokumen, skrip) ke folder tujuan.</li>
+<li><code>-Y "dns" -T fields -e dns.qry.name</code>: Menampilkan seluruh kueri domain DNS (untuk mendeteksi <em>DNS Exfiltration</em>).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal memberikan file <code>.pcap</code> atau <code>.pcapng</code> berisi aktivitas transfer file, login HTTP, atau kueri DNS mencurigakan.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>tshark -r traffic.pcap -Y &quot;dns.flags.response == 0&quot; -T fields -e dns.qry.name | sort | uniq -c | sort -nr</pre>
+        </div>
+        <p class="pipe-note">Mengelompokkan dan menghitung seluruh kueri DNS unik untuk menemukan subdomain pembawa flag/petunjuk.</p>
+      </article>
+<article class="card" data-search="tcpflow follow tcp stream netcat telnet ftp pcap">
+        <div class="card-head">
+          <div class="card-id">03</div>
+          <div class="card-heading">
+            <h4><code>tcpflow</code></h4>
+            <p>— Rekonstruksi Aliran Sesi TCP</p>
+          </div>
+          <span class="chip">TCP Stream</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>tcpflow -r traffic.pcap -o aliran_tcp/</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>tcpflow</code>: Menggabungkan ulang paket-paket TCP yang terpecah menjadi berkas aliran komunikasi utuh per sesi (mirip fitur <em>Follow TCP Stream</em> di Wireshark).</li>
+<li><code>-o aliran_tcp/</code>: Menyimpan setiap aliran komunikasi ke berkas terpisah di dalam folder tujuan.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Data flag dikirim melalui koneksi TCP mentah seperti Netcat, FTP, Telnet, atau protokol chat kustom.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>tcpflow -r traffic.pcap -o aliran_tcp/ &amp;&amp; grep -rnEai &quot;flag\{|ctf\{|pico|academy&quot; aliran_tcp/</pre>
+        </div>
+        <p class="pipe-note">Merekonstruksi seluruh sesi TCP lalu langsung mencari pola flag di semua file hasil aliran.</p>
+      </article>
+<article class="card" data-search="mmls fls icat sleuth kit disk image deleted inode slack space">
+        <div class="card-head">
+          <div class="card-id">04</div>
+          <div class="card-heading">
+            <h4><code>mmls / fls / icat</code></h4>
+            <p>— Forensik Disk Image & Slack Space</p>
+          </div>
+          <span class="chip">The Sleuth Kit</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>mmls disk.img
+<span class="prompt">$</span>fls -r -d -o 2048 disk.img
+<span class="prompt">$</span>icat -r -o 2048 disk.img 1524 &gt; pulih.txt
+<span class="prompt">$</span>icat -s -o 2048 disk.img 2450 &gt; slack.txt</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>mmls</code>: Menampilkan tabel partisi dan sektor awal (<em>Start Sector</em>) pada berkas <code>.img</code> / <code>.dd</code>.</li>
+<li><code>fls -r -d -o 2048</code>: Mendaftar seluruh file secara rekursif (<code>-r</code>) termasuk file yang sudah dihapus (<code>-d</code>) pada partisi dengan offset sektor <code>2048</code>.</li>
+<li><code>icat -r</code>: Mengekstrak isi berkas terhapus berdasarkan nomor inode-nya.</li>
+<li><code>icat -s</code>: Mengekstrak area <strong>Slack Space</strong> (ruang sisa di akhir sektor blok penyimpanan file, seperti pada soal <em>UnforgottenBits</em>).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal memberikan file <code>.img</code>, <code>.dd</code>, atau <code>.iso</code> dengan petunjuk file terhapus atau data tersembunyi di slack space.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>fls -r -o 731136 disk.flag.img | grep -iE &quot;flag|secret|txt|bmp|note|history&quot;</pre>
+        </div>
+        <p class="pipe-note">Memindai seluruh struktur direktori disk image dan menyaring berkas penting milik pengguna.</p>
+      </article>
+<article class="card" data-search="losetup mount loop device disk image read only">
+        <div class="card-head">
+          <div class="card-id">05</div>
+          <div class="card-heading">
+            <h4><code>losetup + mount</code></h4>
+            <p>— Mount Disk Image Seperti Flashdisk</p>
+          </div>
+          <span class="chip">Disk Mounting</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>sudo mkdir -p /mnt/ctf_disk
+<span class="prompt">$</span>sudo losetup -Pf --show disk.flag.img
+<span class="prompt">$</span>sudo mount -o ro /dev/loop0p3 /mnt/ctf_disk</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>losetup -Pf --show</code>: Menghubungkan berkas disk image ke perangkat loop Linux sekaligus memindai partisi di dalamnya (<code>-P</code>).</li>
+<li><code>mount -o ro</code>: Memasang partisi dalam mode <em>Read-Only</em> agar integritas bukti forensik tidak berubah.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Ingin menjelajahi direktori <code>/home</code>, <code>.bash_history</code>, email, dan log di dalam disk image memakai perintah standar <code>find</code>, <code>ls</code>, dan <code>grep</code>.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>find /mnt/ctf_disk/home /mnt/ctf_disk/root -maxdepth 3 2&gt;/dev/null</pre>
+        </div>
+        <p class="pipe-note">Langsung memetakan seluruh berkas pengguna dan riwayat tersembunyi di dalam partisi yang sudah di-mount.</p>
+      </article>
+<article class="card" data-search="vol volatility3 memory dump ram pslist cmdline filescan dumpfiles hashdump">
+        <div class="card-head">
+          <div class="card-id">06</div>
+          <div class="card-heading">
+            <h4><code>vol (Volatility 3)</code></h4>
+            <p>— Investigasi Memory Dump (RAM)</p>
+          </div>
+          <span class="chip">Memory Forensics</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>vol -f memory.raw windows.pslist
+<span class="prompt">$</span>vol -f memory.raw windows.cmdline
+<span class="prompt">$</span>vol -f memory.raw windows.dumpfiles --virtaddr 0x8a123456</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>windows.pslist</code> / <code>windows.pstree</code>: Menampilkan daftar proses aktif saat RAM diambil.</li>
+<li><code>windows.cmdline</code>: Menampilkan argumen baris perintah yang dijalankan tiap program (sering memuat path file flag).</li>
+<li><code>windows.filescan</code> & <code>windows.dumpfiles</code>: Mencari objek file di memori dan mengekstraknya kembali ke disk.</li>
+<li><code>windows.hashdump</code> & <code>windows.netscan</code>: Mengekstrak hash password user & koneksi jaringan aktif.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Berkas tantangan berukuran ratusan MB hingga beberapa GB (<code>.raw</code>, <code>.vmem</code>, <code>.dmp</code>) dengan skenario sistem yang diretas saat sedang menyala.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>vol -f memory.raw windows.filescan | grep -iE &quot;flag|desktop|documents|secret|zip|txt&quot;</pre>
+        </div>
+        <p class="pipe-note">Memindai seluruh berkas yang terbuka di memori dan menyaring folder pribadi pengguna.</p>
+      </article>
+<article class="card" data-search="hashid hash-identifier hashcat mode identify hash type md5 sha1 ntlm">
+        <div class="card-head">
+          <div class="card-id">07</div>
+          <div class="card-heading">
+            <h4><code>hashid</code></h4>
+            <p>— Mengenali Jenis Hash Sebelum Cracking</p>
+          </div>
+          <span class="chip">Hash ID</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>hashid -m &#x27;5f4dcc3b5aa765d61d8327deb882cf99&#x27;</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>hashid</code>: Mencocokkan panjang dan pola karakter sebuah string dengan ratusan format hash yang dikenal, seperti MD5, SHA-1, NTLM, dan bcrypt, untuk menebak algoritme yang dipakai.</li>
+<li><code>-m</code>: Menampilkan nomor mode <code>hashcat</code> yang sesuai (misalnya <code>-m 0</code> untuk MD5) agar bisa langsung dipakai pada perintah <code>hashcat</code>.</li>
+<li>Alternatif: <code>hash-identifier</code> adalah versi interaktif lama, dipakai jika <code>hashid</code> belum terpasang.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal memberikan string hash mentah tanpa keterangan jenisnya sebelum proses cracking dimulai — mengenali algoritme yang tepat jauh lebih efisien daripada mencoba semua mode secara membabi buta.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>hashid -m target_hash.txt | tee dugaan_mode.txt &amp;&amp; hashcat -m 0 -a 0 target_hash.txt /usr/share/wordlists/rockyou.txt</pre>
+        </div>
+        <p class="pipe-note">Menebak mode hash lebih dulu lalu langsung mencobanya dengan <code>hashcat</code> memakai wordlist rockyou sebagai alternatif <code>john</code>.</p>
+      </article>
+      </div>
+    </section>
+<section class="stage" id="stage6" data-stage="stage6">
+      <div class="stage-head">
+        <span class="stage-num">06</span>
+        <div>
+          <span class="stage-eyebrow">Tahap 06</span>
+          <h3>Forensik Artefak Sistem, Git Repository, Database & Log</h3>
+        </div>
+      </div>
+      <p class="stage-desc">Kategori wajib dalam kompetisi CTF modern untuk memulihkan riwayat kode yang dihapus di Git, membedah database SQLite, serta membaca log sistem Windows & Linux.</p>
+      
+      <div class="grid">
+        <article class="card" data-search="git log status checkout fsck commit deleted repository">
+        <div class="card-head">
+          <div class="card-id">01</div>
+          <div class="card-heading">
+            <h4><code>git log / fsck</code></h4>
+            <p>— Pemulihan Commit & Blob Terhapus</p>
+          </div>
+          <span class="chip">Git Forensics</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>git log -p --all
+<span class="prompt">$</span>git fsck --full &amp;&amp; git show &lt;HASH_BLOB&gt;</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>git log -p --all</code>: Menampilkan seluruh riwayat perubahan (<em>diff</em>) dari awal hingga akhir di semua branch.</li>
+<li><code>git fsck --full</code>: Menemukan <em>dangling commits</em> atau <em>dangling blobs</em> yang sudah dihapus dengan <code>git reset</code> namun objeknya masih tersimpan di folder <code>.git</code>.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Direktori ekstraksi mengandung folder tersembunyi <code>.git/</code> dan pembuat soal menghapus flag pada commit terbaru.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>git log -p --all | grep -iE &quot;flag|ctf|pico|academy|password|secret&quot;</pre>
+        </div>
+        <p class="pipe-note">Memindai seluruh baris kode yang pernah ditambahkan atau dihapus di sepanjang sejarah repository Git.</p>
+      </article>
+<article class="card" data-search="sqlite3 database db browser history cookies table dump">
+        <div class="card-head">
+          <div class="card-id">02</div>
+          <div class="card-heading">
+            <h4><code>sqlite3</code></h4>
+            <p>— Bedah Database SQLite & Browser</p>
+          </div>
+          <span class="chip">Database</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>sqlite3 database.db &quot;.tables&quot;
+<span class="prompt">$</span>sqlite3 database.db &quot;.dump&quot;</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>".tables"</code>: Menampilkan daftar seluruh nama tabel di dalam file <code>.db</code> / <code>.sqlite</code>.</li>
+<li><code>".dump"</code>: Mengekspor seluruh struktur tabel dan isi datanya menjadi teks SQL yang mudah dicari.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Perintah <code>file</code> mendeteksi <code>SQLite 3.x database</code> (sering berasal dari artefak browser Chrome/Firefox <code>History</code> atau <code>Cookies</code>).</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>sqlite3 History &quot;.dump&quot; | grep -iE &quot;flag|ctf|pico|academy|http&quot;</pre>
+        </div>
+        <p class="pipe-note">Mengekstrak seluruh riwayat kunjungan URL dan data tersimpan dari database SQLite.</p>
+      </article>
+<article class="card" data-search="evtx_dump windows event log registry regripper hivexget sam">
+        <div class="card-head">
+          <div class="card-id">03</div>
+          <div class="card-heading">
+            <h4><code>evtx_dump / hivexget</code></h4>
+            <p>— Forensik Log Event & Registry Windows</p>
+          </div>
+          <span class="chip">Windows Artifacts</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>evtx_dump Security.evtx &gt; security_logs.xml
+<span class="prompt">$</span>hivexget NTUSER.DAT &quot;Software\Microsoft\Windows\CurrentVersion\Run&quot;</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>evtx_dump</code>: Mengonversi berkas biner <em>Windows Event Log</em> (<code>.evtx</code>) menjadi XML yang bisa dibaca manusia.</li>
+<li><code>hivexget</code>: Membaca kunci dan nilai spesifik dari berkas Windows Registry Hive (<code>NTUSER.DAT</code>, <code>SYSTEM</code>, <code>SAM</code>).</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal memberikan folder artefak Windows seperti <code>System32/winevt/Logs</code> atau file registry pengguna.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>evtx_dump Security.evtx | grep -iE &quot;4624|4688|powershell|flag|ctf|academy&quot;</pre>
+        </div>
+        <p class="pipe-note">Menyaring Event ID login sukses (<code>4624</code>), pembuatan proses baru (<code>4688</code>), atau perintah PowerShell berbahaya.</p>
+      </article>
+<article class="card" data-search="journalctl utmpdump wtmp auth.log linux login history">
+        <div class="card-head">
+          <div class="card-id">04</div>
+          <div class="card-heading">
+            <h4><code>utmpdump / journalctl</code></h4>
+            <p>— Forensik Log Login & Systemd Linux</p>
+          </div>
+          <span class="chip">Linux Artifacts</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>utmpdump /var/log/wtmp
+<span class="prompt">$</span>journalctl --file=system.journal --no-pager</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>utmpdump</code>: Menerjemahkan log biner riwayat login Linux (<code>wtmp</code>, <code>btmp</code>, <code>utmp</code>) menjadi teks terbaca.</li>
+<li><code>journalctl --file=...</code>: Membaca file jurnal systemd biner (<code>.journal</code>) hasil ekstraksi dari disk image Linux.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal meminta melacak alamat IP penyerang yang berhasil login SSH atau perintah yang dijalankan layanan systemd.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>utmpdump wtmp | grep -iE &quot;pts|ssh|flag|ctf&quot;</pre>
+        </div>
+        <p class="pipe-note">Menampilkan sesi terminal SSH beserta IP asal penyerang.</p>
+      </article>
+<article class="card" data-search="apktool jadx apk android decompile smali reverse engineering assets">
+        <div class="card-head">
+          <div class="card-id">05</div>
+          <div class="card-heading">
+            <h4><code>apktool / jadx</code></h4>
+            <p>— Membongkar Berkas APK Android</p>
+          </div>
+          <span class="chip">Android Forensics</span>
+        </div>
+
+        <div class="term ">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Sintaks siap pakai</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>apktool d aplikasi.apk -o hasil_decompile/</pre>
+        </div>
+
+        <div class="card-body">
+          <h5>Fungsi &amp; penjelasan opsi</h5>
+          <ul class="opts">
+            <li><code>apktool d</code>: Mendekompilasi berkas APK, yang sejatinya adalah arsip ZIP, menjadi resource asli dan kode <em>smali</em>, yakni bytecode Dalvik yang terbaca manusia.</li>
+<li><code>jadx -d hasil_jadx/ aplikasi.apk</code>: Alternatif yang mendekompilasi langsung menjadi kode semu mirip Java, umumnya lebih mudah dibaca untuk menelusuri logika penyimpanan flag.</li>
+<li><code>unzip -o aplikasi.apk -d raw/</code>: Cara cepat tanpa dekompilasi penuh untuk langsung melihat isi <code>assets/</code> dan <code>res/raw/</code>, tempat berkas tersembunyi sering diselipkan.</li>
+          </ul>
+        </div>
+
+        <div class="callout">
+          <svg viewBox="0 0 24 24" width="16" height="16" class="callout-ic"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          <div><strong>Kapan dipakai&nbsp;·</strong> Soal memberikan berkas <code>.apk</code> — flag umumnya tersembunyi di <code>strings.xml</code>, pada konstanta kode <em>smali</em> atau Java, atau sebagai berkas tambahan di dalam folder <code>assets/</code>.</div>
+        </div>
+
+        <div class="term term-alt">
+          <div class="term-bar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-label">Kombinasi piping</span>
+            <button class="copy-btn" onclick="copyCode(this)" aria-label="Salin perintah">
+              <svg class="ic-copy" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+          <pre><span class="prompt">$</span>apktool d aplikasi.apk -o out/ &amp;&amp; grep -rnEoa &quot;[a-zA-Z0-9_]+\{[a-zA-Z0-9_@!?-]+\}&quot; out/</pre>
+        </div>
+        <p class="pipe-note">Mendekompilasi seluruh APK lalu langsung menerapkan pola regex flag ke semua berkas hasil dekompilasi sekaligus.</p>
+      </article>
+      </div>
+    </section>
+<section class="stage methodology" id="methodology" data-stage="methodology">
+      <div class="stage-head">
+        <span class="stage-num">WF</span>
+        <div>
+          <span class="stage-eyebrow">Panduan Penutup</span>
+          <h3>Alur Kerja Standar (Step-by-Step Methodology)</h3>
+        </div>
+      </div>
+      <p class="stage-desc">Klik setiap tahapan di bawah ini sebagai <em>checklist</em> saat kamu mengerjakan soal CTF Digital Forensics agar investigasi berjalan sistematis dan terhindar dari <em>rabbit hole</em>.</p>
+      <div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tahap</th>
+<th>Fokus Investigasi</th>
+<th>Perintah Utama</th>
+<th>Target Temuan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Triage Awal</strong></td>
+<td>Identitas, Ukuran &amp; Header</td>
+<td><code>ls -lh</code>, <code>file</code>, <code>xxd -l 32</code></td>
+<td>Tipe file asli, ekstensi palsu, atau <em>Magic Bytes</em> rusak.</td>
+</tr>
+<tr>
+<td><strong>2. Inspeksi Cepat</strong></td>
+<td>Metadata &amp; Teks Mentah</td>
+<td><code>exiftool</code>, <code>strings | grep</code></td>
+<td>Komentar tersembunyi, flag plaintext, atau string Base64/Hex.</td>
+</tr>
+<tr>
+<td><strong>3. Struktur &amp; Carving</strong></td>
+<td>Data Tambahan / Tertanam</td>
+<td><code>binwalk -e</code>, <code>foremost</code>, <code>pngcheck</code></td>
+<td>Arsip ZIP/file kedua setelah <code>IEND</code>/<code>FF D9</code> atau CRC error.</td>
+</tr>
+<tr>
+<td><strong>4. Bedah Kategori</strong></td>
+<td>Analisis Mendalam Spesifik</td>
+<td><code>zsteg</code>/<code>steghide</code>, <code>tshark</code>, <code>mmls</code>/<code>fls</code>, <code>vol</code></td>
+<td>Payload steganografi piksel, objek HTTP/DNS, file terhapus, atau proses RAM.</td>
+</tr>
+<tr>
+<td><strong>5. Dekripsi Akhir</strong></td>
+<td>Rekonstruksi &amp; Decoding</td>
+<td><code>base64 -d</code>, <code>xxd -r -p</code>, <code>john</code>, <code>python3</code></td>
+<td>Mengubah hasil mentah menjadi format flag akhir yang valid.</td>
+</tr>
+</tbody>
+</table></div>
+      <div class="timeline">
+        <label class="step-item">
+<input type="checkbox"/>
+<div>
+<h5>1. Jangan Percaya Ekstensi File</h5>
+<p>Jalankan <code>file</code> dan <code>xxd -l 32</code>. Jika terbaca <code>data</code>, cocokkan 4–8 byte awal dengan tabel <em>Magic Bytes</em> lalu perbaiki memakai <code>printf</code> + <code>dd</code>.</p>
+</div>
+</label>
+<label class="step-item">
+<input type="checkbox"/>
+<div>
+<h5>2. Sapu Bersih Low-Hanging Fruit</h5>
+<p>Jalankan <code>exiftool -a -u</code> dan <code>strings -n 5 | grep -iE "flag|ctf|pico|academy"</code> untuk menemukan petunjuk permukaan.</p>
+</div>
+</label>
+<label class="step-item">
+<input type="checkbox"/>
+<div>
+<h5>3. Cek Trailer &amp; Embedded Files</h5>
+<p>Periksa baris akhir dengan <code>xxd | tail</code> dan jalankan <code>binwalk</code> untuk memastikan tidak ada arsip ZIP atau gambar kedua yang menempel.</p>
+</div>
+</label>
+<label class="step-item">
+<input type="checkbox"/>
+<div>
+<h5>4. Eksekusi Spesifik Media / Bukti</h5>
+<p>PNG/BMP → <code>zsteg -a</code>; JPEG → <code>steghide</code>/<code>stegseek</code>; Audio → <code>sox spectrogram</code>; PCAP → <code>tshark</code>; Disk → <code>mmls/fls/icat</code>; RAM → <code>vol</code>.</p>
+</div>
+</label>
+<label class="step-item">
+<input type="checkbox"/>
+<div>
+<h5>5. Dekode Berlapis &amp; Verifikasi</h5>
+<p>Gunakan <code>base64 -d</code>, <code>xxd -r -p</code>, atau skrip satu baris <code>python3</code> (Biner/ROT13/XOR) secara bertahap hingga string flag terbaca utuh.</p>
+</div>
+</label>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Disusun untuk latihan Capture The Flag kategori Digital Forensics &middot; From L4L_Hackk999 ( Jemo Nedo )
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Theme toggle ---------- */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeToggle');
+  var moonIcon = document.getElementById('themeIconMoon');
+  function applyThemeIcon(){
+    var stored = null;
+    try { stored = localStorage.getItem('forensics-theme'); } catch(e){}
+    var isLight = stored === 'light';
+    moonIcon.style.opacity = isLight ? '0.45' : '1';
+  }
+  try {
+    var saved = localStorage.getItem('forensics-theme');
+    if(saved === 'light' || saved === 'dark'){ root.setAttribute('data-theme', saved); }
+  } catch(e){}
+  applyThemeIcon();
+  themeBtn.addEventListener('click', function(){
+    var current = root.getAttribute('data-theme');
+    var isLight = current === 'light' || (!current && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches && current !== 'dark');
+    var next = isLight ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('forensics-theme', next); } catch(e){}
+    applyThemeIcon();
+  });
+
+  /* ---------- Build sidebar + mobile tabstrip from stage sections ---------- */
+  var stages = Array.prototype.slice.call(document.querySelectorAll('.stage'));
+  var sidebar = document.getElementById('sidebarNav');
+  var tabstrip = document.getElementById('tabstrip');
+  var navMeta = [
+    ["stage1","01","Identifikasi &amp; Metadata"],
+    ["stage2","02","String &amp; Decoding"],
+    ["stage3","03","Steganografi"],
+    ["stage4","04","Carving &amp; Arsip"],
+    ["stage5","05","PCAP, Disk &amp; Memori"],
+    ["stage6","06","Artefak Sistem &amp; Git"],
+    ["methodology","WF","Alur Kerja"]
+  ];
+  function buildNav(container, isMobile){
+    navMeta.forEach(function(m){
+      var btn = document.createElement('button');
+      btn.className = 'nav-link';
+      btn.setAttribute('data-target', m[0]);
+      btn.innerHTML = '<span class="nav-num">'+m[1]+'</span><span class="nav-txt">'+m[2]+'</span>';
+      btn.addEventListener('click', function(){
+        var target = document.getElementById(m[0]);
+        if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); }
+      });
+      container.appendChild(btn);
+    });
+  }
+  buildNav(sidebar, false);
+  buildNav(tabstrip, true);
+
+  var allNavLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-link'));
+  function setActive(id){
+    allNavLinks.forEach(function(l){
+      l.classList.toggle('active', l.getAttribute('data-target') === id);
+    });
+  }
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){ setActive(entry.target.id); }
+      });
+    }, {rootMargin:'-20% 0px -70% 0px'});
+    stages.forEach(function(s){ io.observe(s); });
+  }
+
+  /* ---------- Copy to clipboard ---------- */
+  window.copyCode = function(btn){
+    var pre = btn.closest('.term').querySelector('pre');
+    var lines = Array.prototype.slice.call(pre.querySelectorAll('.prompt')).length ? null : null;
+    var text = pre.innerText.replace(/^\$\s?/gm, '').trim();
+    var finish = function(){
+      var original = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg><span>Disalin</span>';
+      setTimeout(function(){ btn.classList.remove('copied'); btn.innerHTML = original; }, 1600);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(finish, finish);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta); finish();
+    }
+  };
+
+  /* ---------- Search / filter ---------- */
+  var input = document.getElementById('searchInput');
+  var clearBtn = document.getElementById('clearSearch');
+  var noResults = document.getElementById('noResults');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+
+  function runSearch(){
+    var q = input.value.trim().toLowerCase();
+    if(!q){
+      document.body.classList.remove('searching');
+      noResults.classList.remove('show');
+      clearBtn.style.display = 'none';
+      return;
+    }
+    clearBtn.style.display = 'block';
+    document.body.classList.add('searching');
+    var anyMatch = false;
+    stages.forEach(function(stage){ stage.classList.remove('has-match'); });
+    cards.forEach(function(card){
+      var hay = (card.getAttribute('data-search') + ' ' + card.innerText).toLowerCase();
+      var match = hay.indexOf(q) !== -1;
+      card.classList.toggle('match', match);
+      if(match){
+        anyMatch = true;
+        var stage = card.closest('.stage');
+        if(stage){ stage.classList.add('has-match'); }
+      }
+    });
+    noResults.classList.toggle('show', !anyMatch);
+  }
+  input.addEventListener('input', runSearch);
+  clearBtn.addEventListener('click', function(){
+    input.value = ''; runSearch(); input.focus();
+  });
+
+  /* ---------- Methodology checklist (persisted) ---------- */
+  var STORE_KEY = 'forensics-checklist-v1';
+  function loadChecks(){
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(e){ return {}; }
+  }
+  function saveChecks(obj){
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); } catch(e){}
+  }
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.step-item'));
+  var checks = loadChecks();
+  steps.forEach(function(step, idx){
+    var checkEl = document.createElement('span');
+    checkEl.className = 'step-check';
+    checkEl.textContent = (idx+1);
+    var contentDiv = step.querySelector('div');
+    step.insertBefore(checkEl, contentDiv);
+    var key = 's'+idx;
+    if(checks[key]){ step.classList.add('checked'); checkEl.textContent = '✓'; }
+    step.addEventListener('click', function(){
+      step.classList.toggle('checked');
+      var isChecked = step.classList.contains('checked');
+      checkEl.textContent = isChecked ? '✓' : (idx+1);
+      checks[key] = isChecked;
+      saveChecks(checks);
+    });
+  });
+})();
+</script>
+</body>
+</html>
